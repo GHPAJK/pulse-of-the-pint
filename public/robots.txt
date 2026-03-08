@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /survey
+Disallow: /dashboard
+Disallow: /login
+
+Sitemap: https://pulseofthepint.com/sitemap.xml

@@ -48,7 +48,7 @@ export function useDashboard(): DashboardData {
             .from("survey_sessions")
             .select("*", { count: "exact", head: true })
             .eq("location_id", loc.id)
-            .eq("status", "complete");
+            .eq("status", "completed");
 
           setResponseCount(count || 0);
         }

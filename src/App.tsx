@@ -11,6 +11,8 @@ import Claim from "@/pages/Claim";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import Survey from "@/pages/Survey";
+import Privacy from "@/pages/Privacy";
+import Terms from "@/pages/Terms";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -29,6 +31,8 @@ function App() {
               <Route path="/faq" element={<FAQ />} />
               <Route path="/claim" element={<Claim />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/privacy" element={<Privacy />} />
+              <Route path="/terms" element={<Terms />} />
             </Route>
 
             {/* Protected dashboard — no marketing layout */}
