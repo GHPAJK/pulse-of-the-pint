@@ -6,6 +6,7 @@ import ScoreGauge from "@/components/charts/ScoreGauge";
 import HorizontalBar from "@/components/charts/HorizontalBar";
 import DonutChart from "@/components/charts/DonutChart";
 import StackedBar from "@/components/charts/StackedBar";
+import QRGenerator from "@/components/QRGenerator";
 import {
   Beer,
   QrCode,
@@ -127,16 +128,7 @@ function EmptyState({
             {
               done: false,
               title: "Download your QR codes",
-              desc: "Print them for table tents, coasters, bar mats, and menus.",
-              action: (
-                <button
-                  className="inline-flex items-center gap-2 mt-2 px-4 py-2 rounded-lg text-sm font-semibold text-[#2C2C2C] transition-all hover:scale-105"
-                  style={{ backgroundColor: accentColor }}
-                >
-                  <Download className="w-4 h-4" />
-                  Download QR Code (coming soon)
-                </button>
-              ),
+              desc: "Print them for table tents, coasters, bar mats, and menus. Use the QR generator below.",
             },
             {
               done: false,
@@ -163,37 +155,45 @@ function EmptyState({
                   {item.title}
                 </h3>
                 <p className="text-sm text-gray-500">{item.desc}</p>
-                {item.action}
               </div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Survey link */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 max-w-2xl mx-auto">
-        <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-2">
-          <QrCode className="w-4 h-4" />
-          Your Survey Link
-        </h3>
-        <div className="flex items-center gap-3 bg-gray-50 rounded-lg px-4 py-3 border border-gray-200">
-          <code className="text-sm text-gray-700 flex-1 truncate">{surveyUrl}</code>
-          <a
-            href={surveyUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-gray-400 hover:text-gray-700"
-          >
-            <ExternalLink className="w-4 h-4" />
-          </a>
+      {/* QR Code Generator + Survey Link */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-4xl mx-auto">
+        <QRGenerator
+          url={surveyUrl}
+          breweryName={breweryName}
+          accentColor={accentColor}
+        />
+        <div className="space-y-6">
+          <div className="bg-white rounded-2xl border border-gray-200 p-6">
+            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 flex items-center gap-2">
+              <QrCode className="w-4 h-4" />
+              Your Survey Link
+            </h3>
+            <div className="flex items-center gap-3 bg-gray-50 rounded-lg px-4 py-3 border border-gray-200">
+              <code className="text-sm text-gray-700 flex-1 truncate">{surveyUrl}</code>
+              <a
+                href={surveyUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-gray-700"
+              >
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            </div>
+            <p className="text-xs text-gray-400 mt-2">
+              Share this link directly or use the QR code — they go to the same place.
+            </p>
+          </div>
         </div>
-        <p className="text-xs text-gray-400 mt-2">
-          Share this link directly or use the QR code — they go to the same place.
-        </p>
       </div>
 
       {/* Preview */}
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <DashboardPreview accentColor={accentColor} />
       </div>
     </div>
