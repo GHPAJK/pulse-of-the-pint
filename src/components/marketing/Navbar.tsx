@@ -7,6 +7,7 @@ const navLinks = [
   { to: "/insights", label: "What You'll See" },
   { to: "/pricing", label: "Pricing" },
   { to: "/faq", label: "FAQ" },
+  { to: "/news", label: "News" },
 ];
 
 const ACCENT = "#D4AF37";

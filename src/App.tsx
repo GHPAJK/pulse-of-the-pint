@@ -13,6 +13,7 @@ import Dashboard from "@/pages/Dashboard";
 import Survey from "@/pages/Survey";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
+import News from "@/pages/News";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
+              <Route path="/news" element={<News />} />
             </Route>
 
             {/* Protected dashboard — no marketing layout */}
