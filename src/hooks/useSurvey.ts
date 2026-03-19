@@ -33,6 +33,7 @@ export function useSurvey(location: LocationData | null) {
   const [assignedBlocks] = useState(() => assignRandomBlocks());
   const [funQuestionIndex] = useState(() => pickRandomFunQuestion());
   const startTimeRef = useRef(Date.now());
+  const [honeypot, setHoneypot] = useState("");
 
   const allQuestions = useMemo(
     () => buildQuestionList(assignedBlocks, funQuestionIndex),
@@ -177,46 +178,43 @@ export function useSurvey(location: LocationData | null) {
       opted_in_marketing: piiMarketing,
       opted_in_research: piiResearch,
       opted_in_sweepstakes: piiSweepstakes,
+      _hp: honeypot,
     };
 
     if (isSupabaseConfigured) {
       try {
-        // Insert session
-        const { data: session, error: sessionError } = await supabase
-          .from("survey_sessions")
-          .insert(sessionData)
-          .select("id")
-          .single();
+        const ipHash = await generateFingerprint();
 
-        if (sessionError) {
-          console.error("Session insert error:", sessionError);
-        } else if (session) {
-          // Insert responses (non-PII answers only)
-          const responses = Object.entries(answers)
-            .filter(([variable]) => !variable.startsWith("PII_"))
-            .map(([variable, value]) => ({
-              session_id: session.id,
-              location_id: location?.id || "UNKNOWN",
-              variable_name: variable,
-              response_value: Array.isArray(value) ? null : value,
-              response_values: Array.isArray(value) ? value : null,
-              response_text:
-                typeof value === "string" && value.length > 50 ? value : null,
-            }));
+        const responses = Object.entries(answers)
+          .filter(([variable]) => !variable.startsWith("PII_"))
+          .map(([variable, value]) => ({
+            variable_name: variable,
+            response_value: Array.isArray(value) ? null : String(value).slice(0, 500),
+            response_values: Array.isArray(value) ? value : null,
+            response_text:
+              typeof value === "string" && value.length > 50
+                ? value.slice(0, 2000)
+                : null,
+          }));
 
-          const { error: respError } = await supabase
-            .from("session_responses")
-            .insert(responses);
-
-          if (respError) {
-            console.error("Responses insert error:", respError);
+        const { data: result, error: rpcError } = await supabase.rpc(
+          "submit_survey_safe",
+          {
+            p_ip_hash: ipHash,
+            p_session: sessionData,
+            p_responses: responses,
           }
+        );
+
+        if (rpcError) {
+          console.error("Survey submit error:", rpcError.message);
+        } else if (result?.error) {
+          console.error("Survey rejected:", result.error);
         }
       } catch (err) {
         console.error("Submit failed:", err);
       }
     } else {
-      // Demo mode: log to console
       console.log("Survey session (demo):", sessionData);
       console.log("Survey answers (demo):", answers);
     }
@@ -256,6 +254,8 @@ export function useSurvey(location: LocationData | null) {
     handleBack,
     canGoNext,
     setPhase,
+    honeypot,
+    setHoneypot,
   };
 }
 
@@ -267,4 +267,19 @@ function getDeviceType(): string {
   )
     return "mobile";
   return "desktop";
+}
+
+async function generateFingerprint(): Promise<string> {
+  const raw = [
+    navigator.userAgent,
+    navigator.language,
+    screen.width,
+    screen.height,
+    new Date().getTimezoneOffset(),
+  ].join("|");
+  const encoder = new TextEncoder();
+  const data = encoder.encode(raw);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  const arr = Array.from(new Uint8Array(hash));
+  return arr.map((b) => b.toString(16).padStart(2, "0")).join("");
 }

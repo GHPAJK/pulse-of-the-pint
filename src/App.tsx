@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AuthProvider } from "@/hooks/useAuth";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
 import AuthGuard from "@/components/AuthGuard";
+import { AdminGuard } from "@/components/AdminGuard";
 import Landing from "@/pages/Landing";
 import InsightsPreview from "@/pages/InsightsPreview";
 import Pricing from "@/pages/Pricing";
@@ -14,6 +15,8 @@ import Survey from "@/pages/Survey";
 import Privacy from "@/pages/Privacy";
 import Terms from "@/pages/Terms";
 import News from "@/pages/News";
+import About from "@/pages/About";
+import Admin from "@/pages/Admin";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +38,7 @@ function App() {
               <Route path="/privacy" element={<Privacy />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/news" element={<News />} />
+              <Route path="/about" element={<About />} />
             </Route>
 
             {/* Protected dashboard — no marketing layout */}
@@ -44,6 +48,16 @@ function App() {
                 <AuthGuard>
                   <Dashboard />
                 </AuthGuard>
+              }
+            />
+
+            {/* Admin — GHP team only */}
+            <Route
+              path="/admin"
+              element={
+                <AdminGuard>
+                  <Admin />
+                </AdminGuard>
               }
             />
 

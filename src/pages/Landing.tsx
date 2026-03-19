@@ -10,6 +10,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
+import USMap from "@/components/USMap";
 
 const ACCENT = "#D4AF37";
 
@@ -235,6 +236,18 @@ export default function Landing() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Network Map */}
+      <section className="bg-white py-20 border-t border-gray-100">
+        <div className="max-w-4xl mx-auto px-6">
+          <USMap
+            accentColor={ACCENT}
+            title="Join the Growing Network"
+            subtitle="Breweries and taprooms across the country are already listening to their customers."
+            vertical="brewery"
+          />
         </div>
       </section>
 

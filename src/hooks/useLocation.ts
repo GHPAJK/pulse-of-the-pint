@@ -4,6 +4,7 @@ import { supabase, isSupabaseConfigured } from "@/lib/supabase";
 
 export interface LocationData {
   id: string;
+  slug?: string;
   name: string;
   city: string;
   state: string;
@@ -53,8 +54,8 @@ export function useLocation() {
       try {
         const { data, error: fetchError } = await supabase
           .from("locations")
-          .select("id,name,city,state,logo_url,primary_color,secondary_color,accent_color,instagram")
-          .eq("id", locId)
+          .select("id,slug,name,city,state,logo_url,primary_color,secondary_color,accent_color,instagram")
+          .eq("slug", locId)
           .single();
 
         if (fetchError) {
@@ -64,6 +65,7 @@ export function useLocation() {
         } else if (data) {
           setLocation({
             id: data.id,
+            slug: data.slug,
             name: data.name,
             city: data.city,
             state: data.state,

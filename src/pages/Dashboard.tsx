@@ -1,12 +1,18 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useDashboard } from "@/hooks/useDashboard";
+import { useDashboardAnalytics } from "@/hooks/useDashboardAnalytics";
+import { useExportCSV } from "@/hooks/useExportCSV";
 import { buildBreweryMockData } from "@/data/sampleData";
 import ScoreGauge from "@/components/charts/ScoreGauge";
 import HorizontalBar from "@/components/charts/HorizontalBar";
 import DonutChart from "@/components/charts/DonutChart";
 import StackedBar from "@/components/charts/StackedBar";
+import SpendChart from "@/components/charts/SpendChart";
+import QuoteCarousel from "@/components/charts/QuoteCarousel";
 import QRGenerator from "@/components/QRGenerator";
+import QuoteCardGenerator from "@/components/QuoteCardGenerator";
 import {
   Beer,
   QrCode,
@@ -22,7 +28,7 @@ const ACCENT = "#D4AF37";
 
 export default function Dashboard() {
   const { user, signOut } = useAuth();
-  const { location, responseCount, loading } = useDashboard();
+  const { location, responseCount, monthlyCount, loading } = useDashboard();
 
   if (loading) {
     return (
@@ -34,6 +40,9 @@ export default function Dashboard() {
 
   const breweryName = location?.name || user?.user_metadata?.brewery_name || "Your Brewery";
   const accentColor = location?.primary_color || ACCENT;
+  const isBasic = (location as any)?.tier === "basic" || !(location as any)?.tier;
+  const capWarning = isBasic && monthlyCount >= 80;
+  const capReached = isBasic && monthlyCount >= 100;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -66,6 +75,21 @@ export default function Dashboard() {
         </div>
       </nav>
 
+      {/* Response cap warning for Basic tier */}
+      {capReached && (
+        <div className="bg-red-50 border-b border-red-200 px-6 py-3 text-center text-sm text-red-800">
+          <strong>Response limit reached.</strong> Your Basic plan allows 100 responses/month ({monthlyCount} used).
+          New survey responses are paused until next month.{" "}
+          <Link to="/pricing" className="underline font-semibold">Upgrade to Regular</Link> for unlimited responses.
+        </div>
+      )}
+      {capWarning && !capReached && (
+        <div className="bg-amber-50 border-b border-amber-200 px-6 py-3 text-center text-sm text-amber-800">
+          <strong>Approaching limit:</strong> {monthlyCount} of 100 monthly responses used on your Basic plan.{" "}
+          <Link to="/pricing" className="underline font-semibold">Upgrade to Regular</Link> for unlimited responses.
+        </div>
+      )}
+
       <div className="max-w-6xl mx-auto px-6 py-8">
         {responseCount === 0 ? (
           <EmptyState breweryName={breweryName} accentColor={accentColor} locationId={location?.id} />
@@ -77,7 +101,13 @@ export default function Dashboard() {
             locationId={location?.id}
           />
         ) : (
-          <FullDashboard accentColor={accentColor} />
+          <FullDashboard
+            accentColor={accentColor}
+            locationId={location?.id}
+            locationName={breweryName}
+            secondaryColor={location?.secondary_color || "#2C2C2C"}
+            tier={(location as any)?.tier || "basic"}
+          />
         )}
       </div>
     </div>
@@ -254,21 +284,225 @@ function EarlyState({
 }
 
 // ============================================================
-// 25+ responses — full dashboard (placeholder for now)
+// 25+ responses — full dashboard with REAL data
 // ============================================================
-function FullDashboard({ accentColor }: { accentColor: string }) {
+function FullDashboard({
+  accentColor,
+  locationId,
+  locationName,
+  secondaryColor,
+  tier,
+}: {
+  accentColor: string;
+  locationId?: string;
+  locationName?: string;
+  secondaryColor?: string;
+  tier?: string;
+}) {
+  const { data, loading, error } = useDashboardAnalytics(
+    locationId,
+    accentColor,
+    secondaryColor || "#2C2C2C"
+  );
+  const { exportCSV, exporting } = useExportCSV();
+  const [exportRange, setExportRange] = useState<"30" | "90" | "all">("30");
+  const canExport = tier && tier !== "basic";
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+      </div>
+    );
+  }
+
+  // Fallback to mock data if analytics query fails or returns empty
+  if (error || !data) {
+    return (
+      <div className="space-y-8">
+        <div className="flex items-center gap-3 mb-2">
+          <BarChart3 className="w-6 h-6" style={{ color: accentColor }} />
+          <h1 className="text-2xl font-bold text-gray-900">Your Dashboard</h1>
+        </div>
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">
+            Could not load analytics: {error}
+          </div>
+        )}
+        <DashboardPreview accentColor={accentColor} showBanner={false} />
+      </div>
+    );
+  }
+
+  const d = data;
+  const returningPct = d.newVsReturning.find((r) => r.label === "Returning")?.value || 0;
+
   return (
     <div className="space-y-8">
       <div className="flex items-center gap-3 mb-2">
         <BarChart3 className="w-6 h-6" style={{ color: accentColor }} />
         <h1 className="text-2xl font-bold text-gray-900">Your Dashboard</h1>
       </div>
-      <p className="text-gray-500">
-        Live data from your customers. Updated in real time.
-      </p>
+      <div className="flex items-center justify-between flex-wrap gap-4">
+        <p className="text-gray-500">
+          Live data from your customers. Updated in real time.
+        </p>
 
-      {/* TODO: Replace with live Supabase queries */}
-      <DashboardPreview accentColor={accentColor} showBanner={false} />
+        {/* Export Controls */}
+        {canExport ? (
+          <div className="flex items-center gap-2">
+            <select
+              value={exportRange}
+              onChange={(e) => setExportRange(e.target.value as "30" | "90" | "all")}
+              className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 text-gray-700 bg-white"
+            >
+              <option value="30">Last 30 days</option>
+              <option value="90">Last 90 days</option>
+              <option value="all">All time</option>
+            </select>
+            <button
+              onClick={() => exportCSV({ locationId: locationId!, locationName: locationName || "export", dateRange: exportRange })}
+              disabled={exporting}
+              className="inline-flex items-center gap-1.5 text-sm font-medium px-4 py-1.5 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+            >
+              <Download className="w-4 h-4" />
+              {exporting ? "Exporting..." : "Export CSV"}
+            </button>
+          </div>
+        ) : (
+          <div className="text-xs text-gray-400">
+            <Link to="/pricing" className="underline hover:text-gray-600">Upgrade to Regular</Link> to export your data
+          </div>
+        )}
+      </div>
+
+      {/* Row 1: Experience + Return Likelihood */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <ScoreGauge
+          label="Overall Experience"
+          score={d.overallExperience.score}
+          distribution={d.overallExperience.distribution}
+          accentColor={accentColor}
+        />
+        <StackedBar
+          title="Return Likelihood"
+          summaryPct={d.returnLikelihood.summary}
+          summaryLabel="would definitely or probably return"
+          data={d.returnLikelihood.data}
+        />
+      </div>
+
+      {/* Row 2: New vs Returning + Visit Drivers */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <DonutChart
+          title="New vs Returning"
+          data={d.newVsReturning}
+          centerValue={`${returningPct}%`}
+          centerLabel="returning"
+        />
+        <HorizontalBar
+          title="What Brought Them In"
+          data={d.visitDrivers}
+          accentColor={accentColor}
+        />
+      </div>
+
+      {/* Row 3: What They Had + Beer Styles */}
+      {(d.whatTheyHad.length > 0 || d.beerStyles.length > 0) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {d.whatTheyHad.length > 0 && (
+            <HorizontalBar
+              title="What They Had"
+              data={d.whatTheyHad}
+              accentColor={accentColor}
+            />
+          )}
+          {d.beerStyles.length > 0 && (
+            <HorizontalBar
+              title="Beer Styles"
+              data={d.beerStyles}
+              accentColor={accentColor}
+            />
+          )}
+        </div>
+      )}
+
+      {/* Row 4: Service Rating + Vibe */}
+      {(d.serviceRating.score > 0 || d.vibeDescription.length > 0) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {d.serviceRating.score > 0 && (
+            <ScoreGauge
+              label="Service Rating"
+              score={d.serviceRating.score}
+              distribution={d.serviceRating.distribution}
+              accentColor={accentColor}
+            />
+          )}
+          {d.vibeDescription.length > 0 && (
+            <DonutChart
+              title="Vibe Description"
+              data={d.vibeDescription}
+            />
+          )}
+        </div>
+      )}
+
+      {/* Row 5: Spend + Value Most */}
+      {(d.spendPerVisit.length > 0 || d.valueMost.length > 0) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {d.spendPerVisit.length > 0 && (
+            <SpendChart
+              title="Spend Per Visit"
+              data={d.spendPerVisit}
+              accentColor={accentColor}
+            />
+          )}
+          {d.valueMost.length > 0 && (
+            <HorizontalBar
+              title="What They Value Most"
+              data={d.valueMost}
+              accentColor={accentColor}
+            />
+          )}
+        </div>
+      )}
+
+      {/* Row 6: Social + Visit More */}
+      {(d.socialFollow.length > 0 || d.visitMore.length > 0) && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {d.socialFollow.length > 0 && (
+            <DonutChart
+              title="Follow on Social?"
+              data={d.socialFollow}
+            />
+          )}
+          {d.visitMore.length > 0 && (
+            <HorizontalBar
+              title="What Would Bring Them Back"
+              data={d.visitMore}
+              accentColor={accentColor}
+            />
+          )}
+        </div>
+      )}
+
+      {/* Fun Quotes */}
+      {d.funQuotes.length > 0 && (
+        <QuoteCarousel
+          title="Fun Quotes from Your Customers"
+          quotes={d.funQuotes}
+          accentColor={accentColor}
+        />
+      )}
+
+      {/* Quote Card Generator — Regular+ */}
+      {canExport && d.funQuotes.length > 0 && (
+        <QuoteCardGenerator
+          quotes={d.funQuotes}
+          locationName={locationName || "Your Brewery"}
+          accentColor={accentColor}
+        />
+      )}
     </div>
   );
 }

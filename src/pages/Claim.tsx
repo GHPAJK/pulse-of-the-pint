@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
 import { Beer, ArrowRight, CheckCircle2, Sparkles, MapPin, Clock, Crown, Loader2 } from "lucide-react";
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || "";
 
 const ACCENT = "#D4AF37";
 
@@ -23,11 +25,45 @@ export default function Claim() {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
   const [website, setWebsite] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const turnstileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!TURNSTILE_SITE_KEY || typeof window === "undefined") return;
+    const id = "cf-turnstile-script";
+    if (!document.getElementById(id)) {
+      const script = document.createElement("script");
+      script.id = id;
+      script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?onload=onTurnstileLoad";
+      script.async = true;
+      document.head.appendChild(script);
+    }
+    (window as any).onTurnstileLoad = () => {
+      if (turnstileRef.current && (window as any).turnstile) {
+        (window as any).turnstile.render(turnstileRef.current, {
+          sitekey: TURNSTILE_SITE_KEY,
+          callback: (token: string) => setTurnstileToken(token),
+        });
+      }
+    };
+    if ((window as any).turnstile && turnstileRef.current) {
+      (window as any).turnstile.render(turnstileRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        callback: (token: string) => setTurnstileToken(token),
+      });
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+
+    if (TURNSTILE_SITE_KEY && !turnstileToken) {
+      setError("Please complete the verification check.");
+      setLoading(false);
+      return;
+    }
 
     try {
       // 1. Create auth user
@@ -238,11 +274,11 @@ export default function Claim() {
                 <input
                   type="password"
                   required
-                  minLength={6}
+                  minLength={12}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 py-3 rounded-lg border border-gray-300 text-gray-900 focus:outline-none focus:ring-2 focus:ring-amber-400"
-                  placeholder="At least 6 characters"
+                  placeholder="At least 12 characters"
                 />
               </div>
 
@@ -277,9 +313,13 @@ export default function Claim() {
                 />
               </div>
 
+              {TURNSTILE_SITE_KEY && (
+                <div ref={turnstileRef} className="flex justify-center" />
+              )}
+
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || (!!TURNSTILE_SITE_KEY && !turnstileToken)}
                 className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-lg text-lg font-semibold text-[#2C2C2C] transition-all hover:scale-[1.02] disabled:opacity-50"
                 style={{ backgroundColor: ACCENT }}
               >

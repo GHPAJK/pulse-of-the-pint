@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Pulse of the Pint — One Pager</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; width: 8.5in; min-height: 11in; margin: 0 auto; background: #fff; color: #1a1a1a; }
+@media print { body { margin: 0; } @page { size: letter; margin: 0.4in; } }
+
+.header { background: #2C2C2C; color: white; padding: 32px 40px; display: flex; justify-content: space-between; align-items: center; }
+.header-left h1 { font-size: 28px; font-weight: 800; margin-bottom: 4px; }
+.header-left h1 span { color: #D4AF37; }
+.header-left p { font-size: 13px; color: #aaa; }
+.header-right { text-align: center; }
+.header-right img { width: 80px; height: 80px; }
+.header-right p { font-size: 9px; color: #aaa; margin-top: 4px; }
+
+.tagline { background: #D4AF37; color: #2C2C2C; text-align: center; padding: 10px; font-size: 15px; font-weight: 700; }
+
+.section { padding: 24px 40px; }
+.section h2 { font-size: 16px; font-weight: 700; color: #2C2C2C; margin-bottom: 12px; border-bottom: 2px solid #D4AF37; padding-bottom: 4px; display: inline-block; }
+.section p { font-size: 12px; line-height: 1.6; color: #444; }
+
+.how-it-works { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 12px; }
+.step { background: #faf8f0; border: 1px solid #e8e0c8; border-radius: 8px; padding: 14px; text-align: center; }
+.step .num { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 50%; background: #D4AF37; color: #2C2C2C; font-size: 12px; font-weight: 700; margin-bottom: 6px; }
+.step h3 { font-size: 11px; font-weight: 700; margin-bottom: 4px; }
+.step p { font-size: 10px; color: #666; line-height: 1.4; }
+
+.features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; }
+.feature { background: #faf8f0; border: 1px solid #e8e0c8; border-radius: 8px; padding: 12px; }
+.feature h3 { font-size: 11px; font-weight: 700; color: #2C2C2C; margin-bottom: 4px; }
+.feature p { font-size: 10px; color: #666; line-height: 1.4; }
+
+.charts-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 12px; }
+.chart-box { background: #faf8f0; border: 1px solid #e8e0c8; border-radius: 8px; padding: 14px; text-align: center; }
+.chart-box h3 { font-size: 10px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+.chart-box .big-num { font-size: 32px; font-weight: 800; color: #D4AF37; }
+.chart-box .label { font-size: 10px; color: #666; margin-top: 2px; }
+.bar-row { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.bar-label { font-size: 9px; color: #666; width: 60px; text-align: right; }
+.bar-track { flex: 1; height: 14px; background: #e8e0c8; border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; background: #D4AF37; }
+.bar-val { font-size: 9px; color: #666; width: 28px; }
+
+.pricing { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 12px; }
+.tier { border: 1px solid #e8e0c8; border-radius: 8px; padding: 14px; }
+.tier.featured { border-color: #D4AF37; background: #faf8f0; }
+.tier h3 { font-size: 13px; font-weight: 700; }
+.tier .price { font-size: 20px; font-weight: 800; color: #D4AF37; margin: 4px 0; }
+.tier .price span { font-size: 11px; font-weight: 400; color: #888; }
+.tier ul { list-style: none; font-size: 9px; color: #666; margin-top: 6px; }
+.tier ul li { padding: 2px 0; }
+.tier ul li::before { content: "✓ "; color: #D4AF37; font-weight: 700; }
+
+.cta-bar { background: #2C2C2C; color: white; padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; }
+.cta-bar .left h3 { font-size: 16px; font-weight: 700; }
+.cta-bar .left p { font-size: 11px; color: #aaa; margin-top: 2px; }
+.cta-bar .right { display: flex; align-items: center; gap: 16px; }
+.cta-bar .qr { width: 64px; height: 64px; background: white; border-radius: 4px; display: flex; align-items: center; justify-content: center; }
+.cta-bar .url { text-align: right; }
+.cta-bar .url .main { font-size: 14px; font-weight: 700; color: #D4AF37; }
+.cta-bar .url .sub { font-size: 9px; color: #aaa; }
+
+.footer { text-align: center; padding: 12px; font-size: 9px; color: #aaa; }
+.footer a { color: #D4AF37; text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <h1>Pulse of the <span>Pint</span></h1>
+    <p>Real-time customer experience surveys for breweries & taprooms</p>
+  </div>
+  <div class="header-right">
+    <img src="images/qr-claim.png" alt="Scan to claim" style="width:80px;height:80px;border-radius:8px;" />
+    <p>Scan to claim your free survey</p>
+  </div>
+</div>
+
+<div class="tagline">Hear from your customers. Before they review you.</div>
+
+<div class="section">
+  <h2>How It Works</h2>
+  <div class="how-it-works">
+    <div class="step">
+      <div class="num">1</div>
+      <h3>We Build It</h3>
+      <p>Your logo, colors, and name. Branded survey ready in 48 hours.</p>
+    </div>
+    <div class="step">
+      <div class="num">2</div>
+      <h3>You Place QR Codes</h3>
+      <p>Print-ready for table tents, coasters, menus, and receipts.</p>
+    </div>
+    <div class="step">
+      <div class="num">3</div>
+      <h3>Customers Scan</h3>
+      <p>5-minute survey. No app. One question at a time on their phone.</p>
+    </div>
+    <div class="step">
+      <div class="num">4</div>
+      <h3>You Get Insights</h3>
+      <p>Live dashboard with scores, preferences, and customer quotes.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Sample Dashboard Metrics</h2>
+  <div class="charts-row">
+    <div class="chart-box">
+      <h3>Overall Satisfaction</h3>
+      <div class="big-num">4.2</div>
+      <div class="label">out of 5.0</div>
+    </div>
+    <div class="chart-box">
+      <h3>Return Likelihood</h3>
+      <div style="margin-top:8px;">
+        <div class="bar-row"><div class="bar-label">Definitely</div><div class="bar-track"><div class="bar-fill" style="width:62%"></div></div><div class="bar-val">62%</div></div>
+        <div class="bar-row"><div class="bar-label">Probably</div><div class="bar-track"><div class="bar-fill" style="width:24%"></div></div><div class="bar-val">24%</div></div>
+        <div class="bar-row"><div class="bar-label">Maybe</div><div class="bar-track"><div class="bar-fill" style="width:10%"></div></div><div class="bar-val">10%</div></div>
+        <div class="bar-row"><div class="bar-label">Unlikely</div><div class="bar-track"><div class="bar-fill" style="width:4%"></div></div><div class="bar-val">4%</div></div>
+      </div>
+    </div>
+    <div class="chart-box">
+      <h3>Top Visit Drivers</h3>
+      <div style="margin-top:8px;">
+        <div class="bar-row"><div class="bar-label">Beer selection</div><div class="bar-track"><div class="bar-fill" style="width:45%"></div></div><div class="bar-val">45%</div></div>
+        <div class="bar-row"><div class="bar-label">Atmosphere</div><div class="bar-track"><div class="bar-fill" style="width:28%"></div></div><div class="bar-val">28%</div></div>
+        <div class="bar-row"><div class="bar-label">Location</div><div class="bar-track"><div class="bar-fill" style="width:15%"></div></div><div class="bar-val">15%</div></div>
+        <div class="bar-row"><div class="bar-label">Word of mouth</div><div class="bar-track"><div class="bar-fill" style="width:12%"></div></div><div class="bar-val">12%</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>What You Get</h2>
+  <div class="features">
+    <div class="feature">
+      <h3>Branded Surveys</h3>
+      <p>Your logo, colors, and name on every screen. Customers see your brand, never ours.</p>
+    </div>
+    <div class="feature">
+      <h3>Print-Ready QR Codes</h3>
+      <p>PNG & SVG downloads in multiple sizes. Place anywhere customers will see them.</p>
+    </div>
+    <div class="feature">
+      <h3>Live Dashboard</h3>
+      <p>Satisfaction scores, product preferences, service ratings, and customer comments — updated in real time.</p>
+    </div>
+    <div class="feature">
+      <h3>Weekly Reports</h3>
+      <p>Email summaries so you never miss a trend. Low-score alerts catch issues fast.</p>
+    </div>
+    <div class="feature">
+      <h3>State Benchmarking</h3>
+      <p>See how you compare to anonymized averages in your state and nationwide.</p>
+    </div>
+    <div class="feature">
+      <h3>Social Content</h3>
+      <p>Quote cards from your best customer feedback. Download and share on any platform.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Pricing</h2>
+  <div class="pricing">
+    <div class="tier">
+      <h3>Basic</h3>
+      <div class="price">Free <span>forever</span></div>
+      <ul>
+        <li>Branded survey + QR codes</li>
+        <li>Satisfaction score</li>
+        <li>Up to 100 responses/mo</li>
+        <li>Monthly email report</li>
+      </ul>
+    </div>
+    <div class="tier featured">
+      <h3>Regular</h3>
+      <div class="price">$79<span>/mo</span></div>
+      <ul>
+        <li>Everything in Basic</li>
+        <li>Unlimited responses</li>
+        <li>Full dashboard</li>
+        <li>CSV export + weekly reports</li>
+        <li>State benchmarking</li>
+        <li>Quote card generator</li>
+      </ul>
+    </div>
+    <div class="tier">
+      <h3>Advanced</h3>
+      <div class="price">$199<span>/mo</span></div>
+      <ul>
+        <li>Everything in Regular</li>
+        <li>Custom questions</li>
+        <li>National benchmarking</li>
+        <li>API access + PDF reports</li>
+        <li>Priority support</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="cta-bar">
+  <div class="left">
+    <h3>First 50 breweries get Regular free for 3 months.</h3>
+    <p>No credit card. No catch. OG pricing locked for life.</p>
+  </div>
+  <div class="right">
+    <div class="url">
+      <div class="main">pulseofthepint.com/claim</div>
+      <div class="sub">or scan the QR code →</div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  Part of the <a href="https://goodhumanpanels.com">Good Human Panels</a> network &middot; Built by <a href="https://goodhumanpartners.com">Good Human Partners</a> &middot; info@goodhumanpartners.com &middot; 203.522.1088
+</div>
+
+</body>
+</html>

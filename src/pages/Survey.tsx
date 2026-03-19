@@ -84,19 +84,32 @@ export default function Survey() {
       }
 
       return (
-        <SurveyShell
-          location={location}
-          currentQuestion={survey.currentQuestion}
-          currentIndex={survey.currentIndex}
-          progressCurrent={survey.progressCurrent}
-          progressTotal={survey.progressTotal}
-          answers={survey.answers}
-          isLastQuestion={survey.isLastQuestion}
-          canGoNext={survey.canGoNext()}
-          onAnswer={survey.setAnswer}
-          onNext={survey.handleNext}
-          onBack={survey.handleBack}
-        />
+        <>
+          {/* Honeypot: invisible to humans, bots auto-fill it */}
+          <input
+            type="text"
+            name="website_url"
+            value={survey.honeypot}
+            onChange={(e) => survey.setHoneypot(e.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            style={{ position: "absolute", left: "-9999px", opacity: 0, height: 0 }}
+          />
+          <SurveyShell
+            location={location}
+            currentQuestion={survey.currentQuestion}
+            currentIndex={survey.currentIndex}
+            progressCurrent={survey.progressCurrent}
+            progressTotal={survey.progressTotal}
+            answers={survey.answers}
+            isLastQuestion={survey.isLastQuestion}
+            canGoNext={survey.canGoNext()}
+            onAnswer={survey.setAnswer}
+            onNext={survey.handleNext}
+            onBack={survey.handleBack}
+          />
+        </>
       );
   }
 }
